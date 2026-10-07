@@ -30,6 +30,14 @@ public sealed class LevelTimer : MonoBehaviour
 
     private bool running;
 
+    private void Awake()
+    {
+        // Initialize the countdown BEFORE any Start() begins ticking it.
+        // LevelController.Start() calls SetRunning(true); without this,
+        // TimeLeft would start at 0 and expire on the first frame.
+        TimeLeft = config != null ? config.initialTime : 0f;
+    }
+
     private void OnEnable()
     {
         if (levelReset != null)
