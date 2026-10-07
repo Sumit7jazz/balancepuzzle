@@ -151,7 +151,7 @@ public sealed class HudController : MonoBehaviour
         go.AddComponent<InputSystemUIInputModule>();
     }
 
-    private static Font BuiltinFont() => Resources.GetBuiltinResource<Font>("Arial.ttf");
+    private static Font BuiltinFont() => Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
     private void BuildUI()
     {
