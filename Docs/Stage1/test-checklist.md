@@ -182,15 +182,44 @@ These do not replace Play Mode tests, but they are real checks with real tools:
    (commit 2101af9). No gameplay numbers changed.
    Retest required in Play Mode: ST-TIME-01, ST-TIME-02, ST-RST-01.
 
-2. **C# syntax:** all 17 scripts parsed with a real C# grammar (tree-sitter):
+2. **BUG-002 (CRITICAL, fixed):** `HudController.AddHoldHandler` had a compile
+   error — the PointerUp lambda invoked `up()` where `up` is the
+   `EventTrigger.Entry` local, not the `onUp` callback. `Entry` is not
+   invocable, so the entire project would not compile and the rotate buttons
+   were dead. Fix: invoke `onUp()` as intended (commit c0a1977, one line).
+   Retest required in Play Mode: ST-ROT-03, ST-ROT-04, ST-CMP-01.
+
+3. **BUG-003 (HIGH, fixed):** Stone root GameObjects were scaled to the
+   configured size, so `Rigidbody.centerOfMass` (expressed in scaled local
+   space) produced distorted world-space COM offsets — e.g. Stone C would have
+   had COM at (-0.18, 0.035) instead of the configured (-0.15, 0.05). COM
+   accuracy is the core balancing mechanic; ST-PHY-02/03/04 and ST-STB-06
+   depend on it.
+   Fix: root GameObjects now stay at scale (1,1,1); the BoxCollider carries
+   the true configured size and the cube mesh lives on a "Visual" child
+   scaled to the stone size (commit c248ebc). No gameplay numbers changed.
+   Verified compatible: selector raycasts the root collider, the presenter
+   finds the child MeshRenderer via GetComponentInChildren.
+   Retest required in Play Mode: ST-PHY-01–04, ST-COM-01–03.
+
+4. **Robustness hardening (commit c0a1977, no behavior change when wired
+   correctly):**
+   - `StoneState.ResetState`: teleports via `Rigidbody.position`/`rotation`
+     (the documented-correct API) instead of `Transform`.
+   - `LevelTimer.Update`, `StoneRotator.Update`: null-guard wired references
+     so a missing scene wire cannot throw per-frame.
+   - `StepLockManager.TryLockCandidate`: null-guard `levelTimer` before
+     `AddBonus`.
+
+5. **C# syntax:** all 17 scripts parsed with a real C# grammar (tree-sitter):
    0 syntax errors.
 
-3. **Scene/prefab YAML:** all 12 asset files — every local fileID resolves,
+6. **Scene/prefab YAML:** all 12 asset files — every local fileID resolves,
    every GUID has a .meta, every script reference maps to a real script,
-   28 GameObjects / 28 Transforms with consistent parents/children/back-refs,
-   no duplicate fileIDs.
+   no duplicate fileIDs. Stone hierarchy verified: root at scale 1,
+   BoxCollider sized per config, Visual child scaled per config.
 
-4. **Logic review:** selection/drag/rotation gating (Placing-only, locked-stone
+7. **Logic review:** selection/drag/rotation gating (Placing-only, locked-stone
    exclusion, UI pointer rejection), drag plane + radius clamp, release →
    dynamic + BeginEvaluation, calm-time + velocity + impact + killY + COM-support
    evaluation, candidate-only lock, 2/3/5/7 bonuses from config, 150 cap,
@@ -198,4 +227,11 @@ These do not replace Play Mode tests, but they are real checks with real tools:
    (LevelTimer), presentation decoupled from locking — all match the approved
    Stage 1 contract. No additional defects found.
 
-5. **Secrets scan:** PASS (no secrets in new/changed files).
+8. **Contract compliance:** no future-stage features in code; InputReader is
+   the sole gameplay input consumer (HudController touches
+   `UnityEngine.InputSystem.UI` only for the EventSystem's UI input module —
+   required UI infrastructure, not gameplay input); no `FindObjectOfType` in
+   runtime scripts (editor-only finalizer excepted); no hardcoded gameplay
+   numbers (all from Stage1Config); all config values match plan §H.
+
+9. **Secrets scan:** PASS (no secrets in new/changed files).
