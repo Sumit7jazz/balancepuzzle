@@ -1,37 +1,46 @@
 # Stage 1 — Verification Report
 
-Date: 2026-10-07
+Date: 2026-10-07 (static) / 2026-10-08 (Unity handover update)
 Branch: `stage-1-development`
 Scope: Core Physics Sandbox (File Groups 1–4 + testing fixes)
 
 This report compares the actual implementation against the approved Stage 1
-plan (`Docs/Stage1/plan.md`, the contract). It is written after the testing
-phase's static verification. **Unity Play Mode testing remains BLOCKED**
-(no Unity Editor in this environment) — see "What remains blocked".
+plan (`Docs/Stage1/plan.md`, the contract).
+
+> **2026-10-08 update:** The user ran the project in Unity 6000.0.4f1.
+> Environment, packages (Input System, URP, UI), Active Input Handling,
+> Solver Iterations (8), gravity, fixed timestep, initial compile (0 errors,
+> 0 warnings), scene load, finalizer execution, InputReader wiring, and
+> Stage1Config values all PASS. Three runtime blockers were discovered
+> (BUG-004/005/006) and fixed. Full Play Mode verification still pending.
 
 ---
 
-## 1. What passed (static verification)
+## 1. What passed
 
-All of the following were verified with real tools, not by inspection alone:
+**Static verification (all with real tools):**
+- C# syntax: 17/17 parse clean. PASS.
+- YAML referential integrity: 12/12 files. PASS.
+- Config values match plan §H. PASS.
+- Physics materials correct. PASS.
+- Contract compliance (no future-stage features, input isolation, no
+  FindObjectOfType in runtime, no hardcoded numbers, event-driven reset).
+  PASS.
+- Secrets scan. PASS.
 
-- **C# syntax:** 17/17 scripts parse clean under a real C# grammar. PASS.
-- **YAML referential integrity:** 12/12 asset files — every local fileID
-  resolves, every GUID has a `.meta`, every `m_Script` maps to a real script,
-  no duplicate fileIDs. PASS.
-- **Config values:** every `Stage1Config` value matches plan §H (stones,
-  stability, timer, bonuses 2/3/5/7, interaction, killY, platform). PASS.
-- **Physics materials:** stone 0.6/0.6/0.02, platform 0.9/0.9/0. PASS.
-- **Contract compliance:** no future-stage features; InputReader is the sole
-  gameplay input consumer; no `FindObjectOfType` in runtime code; no hardcoded
-  gameplay numbers; event-driven reset; candidate-only locking; single timer
-  authority; presentation decoupled from gameplay. PASS.
-- **Secrets scan:** PASS.
-- **Git:** working tree clean, history linear, no force-push, no secrets.
+**Unity verification (user, 2026-10-08, Unity 6000.0.4f1):**
+- Unity version, packages, input handling, physics settings. PASS.
+- Initial compile: 0 errors, 0 warnings. PASS.
+- Scene loads. PASS.
+- Finalizer executes; InputReader references assigned. PASS.
+- Stage1Config values correct. PASS.
+- Font issue (Arial → LegacyRuntime) fixed and verified. PASS.
 
-## 2. What failed (defects found by static testing)
+## 2. What failed (defects found)
 
-Three defects were found and fixed. All fixes are committed and pushed.
+Three defects were found by static review and fixed (commits 2101af9,
+c0a1977, c248ebc). Three more were found by Unity runtime testing and fixed
+(commit 120f46a). All six fixes are committed and pushed.
 
 ### BUG-001 — CRITICAL — Timer expired on frame 1 (fixed, commit 2101af9)
 - **Symptom:** every fresh level would instantly fail with "Time up."
@@ -46,23 +55,57 @@ Three defects were found and fixed. All fixes are committed and pushed.
 - **Symptom:** compile error; rotate buttons dead.
 - **Root cause:** in `HudController.AddHoldHandler`, the PointerUp lambda
   invoked `up()` where `up` is the `EventTrigger.Entry` local — `Entry` is
-  not invocable. (A brace-balance check cannot catch type errors; the
-  tree-sitter parse also cannot — this was caught by careful re-reading.)
+  not invocable.
 - **Fix:** invoke `onUp()` as intended (one line).
 - **Files changed:** `Assets/Scripts/UI/HudController.cs` (1 line).
 - **Risk:** none. **Retest required:** ST-CMP-01, ST-ROT-03, ST-ROT-04.
 
 ### BUG-003 — HIGH — COM offsets distorted by scaled transforms (fixed, commit c248ebc)
-- **Symptom:** world-space COM would not match the configured offsets
-  (e.g. Stone C: (-0.18, 0.035) instead of (-0.15, 0.05)).
+- **Symptom:** world-space COM would not match configured offsets.
 - **Root cause:** stone root GameObjects were scaled to the configured size;
   `Rigidbody.centerOfMass` is expressed in scaled local space.
 - **Fix:** roots stay at scale (1,1,1); BoxCollider carries the true size;
   the cube mesh moved to a "Visual" child scaled to the stone size.
 - **Files changed:** 4 stone prefabs + `Stage1_Sandbox.unity` (structure only).
-- **Risk:** low-medium (hierarchy change). Selector/presenter/dragger
-  compatibility verified statically. **Retest required:** ST-PHY-01–04,
-  ST-COM-01–03, ST-INT-01.
+- **Risk:** low-medium. **Retest required:** ST-PHY-01–04, ST-COM-01–03.
+
+### BUG-004 — CRITICAL — Input actions fail at startup (fixed, commit 120f46a)
+- **Symptom (Unity 6000.0.4f1):** "Failed to load
+  '.../Stage1Input.inputactions'. File may be corrupted or was serialized
+  with a newer version of Unity." Asset opens fine in the Input Actions
+  editor but fails at startup deserialization.
+- **Root cause:** `Stage1AssetFinalizer` used `AssetDatabase.AddObjectToAsset`
+  to inject `InputActionReference` sub-assets into the `.inputactions` file,
+  corrupting Unity 6 Input System serialization.
+- **Fix:** finalizer now creates standalone `InputActionReference` .asset
+  files under `Assets/Input/References/`; the `.inputactions` JSON is never
+  modified.
+- **Files changed:** `Assets/Editor/Stage1AssetFinalizer.cs` (rewritten).
+- **User action required:** `git checkout -- Assets/Input/Stage1Input.inputactions`
+  (restore corrupted file), then re-run Finalize.
+- **Risk:** low. **Retest required:** ST-CMP-04, ST-INT-01–07, ST-ROT-01–05.
+
+### BUG-005 — CRITICAL — Materials pink, shader GUID invalid (fixed, commit 120f46a)
+- **Symptom (Unity 6000.0.4f1):** "Could not extract GUID in text file ...
+  at line 11"; materials show `Hidden/InternalErrorShader` (pink).
+- **Root cause:** generated `.mat` YAML contained a 33-character shader GUID
+  (valid Unity GUIDs are exactly 32 hex chars). The malformed YAML failed
+  import, so the finalizer's `LoadAssetAtPath` returned null and could not
+  repair them.
+- **Fix:** corrected to valid 32-char placeholder GUIDs in all three `.mat`
+  files; finalizer now logs clear errors if a material fails to load.
+- **Files changed:** 3 `.mat` files; `Stage1AssetFinalizer.cs`.
+- **Risk:** low. **Retest required:** ST-CMP-02/03, re-run Finalize, confirm
+  URP/Lit in Inspector.
+
+### BUG-006 — HIGH — Arial font throws in Unity 6 (fixed, commit 120f46a)
+- **Symptom (Unity 6000.0.4f1):** `ArgumentException: Arial.ttf is no longer
+  a valid built in font.`
+- **Root cause:** `HudController` used
+  `Resources.GetBuiltinResource<Font>("Arial.ttf")`.
+- **Fix:** use `"LegacyRuntime.ttf"` (verified in user's environment).
+- **Files changed:** `Assets/Scripts/UI/HudController.cs` (1 line).
+- **Risk:** none. **Retest required:** ST-CMP-04, HUD suite.
 
 ### Robustness hardening (commit c0a1977, no behavior change when wired correctly)
 - `StoneState.ResetState` teleports via `Rigidbody.position`/`rotation`.
@@ -76,22 +119,29 @@ Three defects were found and fixed. All fixes are committed and pushed.
 | BUG-001 timer init | CRITICAL | 2101af9 | ST-TIME-01/02, ST-RST-01 |
 | BUG-002 compile error | CRITICAL | c0a1977 | ST-CMP-01, ST-ROT-03/04 |
 | BUG-003 COM distortion | HIGH | c248ebc | ST-PHY-01–04, ST-COM-01–03, ST-INT-01 |
+| BUG-004 input serialization | CRITICAL | 120f46a | ST-CMP-04, ST-INT-01–07, ST-ROT-01–05 |
+| BUG-005 material GUID | CRITICAL | 120f46a | ST-CMP-02/03, Finalize re-run |
+| BUG-006 Arial font | HIGH | 120f46a | ST-CMP-04, HUD suite |
 | Robustness hardening | LOW | c0a1977 | regression (reset suite) |
 
-No open defects remain from static review.
+No open defects remain. Six bugs found, six fixed.
 
-## 4. What remains blocked
+## 4. What remains
 
-**All Unity-dependent verification** — compile in the real Unity compiler,
-Play Mode, the full test checklist (ST-ENV, ST-CMP, ST-PHY, ST-INT, ST-ROT,
-ST-STB, ST-STEP, ST-TIME, ST-RST, ST-PRES, ST-COM, HUD, ST-DEV Android).
-These are marked BLOCKED in `Docs/Stage1/test-checklist.md`, honestly —
-none is reported as PASS.
+**Unity Play Mode verification** — the full gameplay test matrix
+(ST-PHY, ST-INT, ST-ROT, ST-STB, ST-STEP, ST-TIME, ST-RST, ST-PRES, ST-COM,
+HUD, ST-DEV Android). These are marked BLOCKED in
+`Docs/Stage1/test-checklist.md` pending the retest pass.
 
-The exact manual procedure for the tester is in `Docs/Stage1/unity-setup.md`
-(§5 Finalize step) plus the checklist. Priority retests after the fixes:
-ST-CMP-01 (compile), ST-TIME-01 (timer starts at 120), ST-ROT-03/04
-(rotate buttons), ST-PHY-02/03 (COM behavior), ST-COM-02 (COM gizmos).
+**Required user steps before retesting** (in order):
+1. Pull latest (`git pull origin stage-1-development`).
+2. Restore the corrupted input asset:
+   `git checkout -- Assets/Input/Stage1Input.inputactions`
+3. In Unity: run `Balance Puzzle → Finalize Stage 1 Assets`, save scene.
+4. Confirm: 0 console errors, materials show URP/Lit (not pink), no
+   inputactions load failure on Play Mode start.
+5. Execute `Docs/Stage1/test-checklist.md` in order, priority on the retests
+   in §3 above.
 
 ## 5. Approved deviations (documented, behavior-preserving)
 

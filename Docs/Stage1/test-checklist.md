@@ -202,7 +202,42 @@ These do not replace Play Mode tests, but they are real checks with real tools:
    finds the child MeshRenderer via GetComponentInChildren.
    Retest required in Play Mode: ST-PHY-01–04, ST-COM-01–03.
 
-4. **Robustness hardening (commit c0a1977, no behavior change when wired
+> **Update 2026-10-08 — Unity runtime handover (Unity 6000.0.4f1):**
+> Environment, packages, compile (0 errors), scene load, and Stage1Config all
+> PASS. Three new runtime blockers found and fixed below.
+
+4. **BUG-004 (CRITICAL, fixed 2026-10-08, commit 120f46a):**
+   `Stage1AssetFinalizer` used `AssetDatabase.AddObjectToAsset` to inject
+   `InputActionReference` sub-assets directly into `Stage1Input.inputactions`.
+   In Unity 6 this corrupts Input System serialization: the asset opens fine
+   in the Input Actions editor but fails at startup deserialization ("File
+   may be corrupted or was serialized with a newer version of Unity").
+   Fix: the finalizer now creates standalone `InputActionReference` .asset
+   files under `Assets/Input/References/` and never modifies the
+   `.inputactions` JSON.
+   User action required: restore the corrupted file from git
+   (`git checkout -- Assets/Input/Stage1Input.inputactions`), then re-run
+   `Balance Puzzle → Finalize Stage 1 Assets`.
+   Retest required: ST-CMP-04 (no startup errors), ST-INT-01–07, ST-ROT-01–05.
+
+5. **BUG-005 (CRITICAL, fixed 2026-10-08, commit 120f46a):** Material `.mat`
+   YAML contained a 33-character shader GUID (valid Unity GUIDs are exactly
+   32 hex chars), causing "Could not extract GUID in text file ... at line
+   11" import failure. Materials fell back to `Hidden/InternalErrorShader`
+   (pink), and the finalizer could not repair them because
+   `LoadAssetAtPath` failed on the malformed YAML.
+   Fix: corrected to valid 32-char placeholder GUIDs in all three `.mat`
+   files. The finalizer now reports clear errors if a material still fails
+   to load.
+   Retest required: ST-CMP-02/03, then re-run Finalize and confirm URP/Lit.
+
+6. **BUG-006 (HIGH, fixed 2026-10-08, commit 120f46a):** `HudController`
+   used `Resources.GetBuiltinResource<Font>("Arial.ttf")`, which throws
+   `ArgumentException` in Unity 6 ("Arial.ttf is no longer a valid built in
+   font"). Fix: use `"LegacyRuntime.ttf"` (verified in Unity 6000.0.4f1).
+   Retest required: ST-CMP-04, HUD suite.
+
+7. **Robustness hardening (commit c0a1977, no behavior change when wired
    correctly):**
    - `StoneState.ResetState`: teleports via `Rigidbody.position`/`rotation`
      (the documented-correct API) instead of `Transform`.

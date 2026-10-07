@@ -39,11 +39,17 @@ section H. No manual creation needed.
 ## 5. Finalize Stage 1 assets (File Group 4, one-time)
 
 1. Open the scene `Assets/Scenes/Stage1_Sandbox.unity`.
-2. Run the menu item **Balance Puzzle → Finalize Stage 1 Assets**.
-   This wires `InputReader`'s three input-action references from
-   `Assets/Input/Stage1Input.inputactions` and ensures the Stage 1 materials
-   use the URP Lit shader.
-3. Save the scene (Ctrl/Cmd+S).
+2. **If you previously ran an older version of the finalizer** (before
+   2026-10-08) and `Stage1Input.inputactions` fails to load at startup,
+   restore the clean asset first:
+   `git checkout -- Assets/Input/Stage1Input.inputactions`
+3. Run the menu item **Balance Puzzle → Finalize Stage 1 Assets**.
+   This creates standalone `InputActionReference` assets under
+   `Assets/Input/References/`, wires `InputReader`'s three action
+   references, and ensures the Stage 1 materials use the URP Lit shader.
+4. Save the scene (Ctrl/Cmd+S).
+5. Verify: 0 console errors; the three materials show **URP/Lit** (not pink);
+   entering Play Mode produces no input-asset load failure.
 
 ## 6. Later groups
 
