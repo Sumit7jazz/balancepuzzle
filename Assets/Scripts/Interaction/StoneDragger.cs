@@ -41,22 +41,34 @@ public sealed class StoneDragger : MonoBehaviour
 
         if (config == null)
             Debug.LogError("StoneDragger: Stage1Config is not assigned.", this);
+        if (inputReader == null)
+            Debug.LogError("StoneDragger: InputReader is not assigned.", this);
+        if (levelController == null)
+            Debug.LogError("StoneDragger: LevelController is not assigned.", this);
+        if (selector == null)
+            Debug.LogError("StoneDragger: StoneSelector is not assigned.", this);
     }
 
     private void OnEnable()
     {
-        inputReader.SelectPerformed += HandleSelect;
-        inputReader.PointerMoved += HandlePointerMoved;
-        inputReader.SelectReleased += HandleRelease;
+        if (inputReader != null)
+        {
+            inputReader.SelectPerformed += HandleSelect;
+            inputReader.PointerMoved += HandlePointerMoved;
+            inputReader.SelectReleased += HandleRelease;
+        }
         if (levelReset != null)
             levelReset.ResetRequested += ResetState;
     }
 
     private void OnDisable()
     {
-        inputReader.SelectPerformed -= HandleSelect;
-        inputReader.PointerMoved -= HandlePointerMoved;
-        inputReader.SelectReleased -= HandleRelease;
+        if (inputReader != null)
+        {
+            inputReader.SelectPerformed -= HandleSelect;
+            inputReader.PointerMoved -= HandlePointerMoved;
+            inputReader.SelectReleased -= HandleRelease;
+        }
         if (levelReset != null)
             levelReset.ResetRequested -= ResetState;
     }
@@ -64,6 +76,9 @@ public sealed class StoneDragger : MonoBehaviour
     private void HandleSelect(Vector2 screenPosition)
     {
         if (IsDragging || config == null)
+            return;
+
+        if (levelController == null || selector == null)
             return;
 
         if (levelController.State != LevelState.Placing)

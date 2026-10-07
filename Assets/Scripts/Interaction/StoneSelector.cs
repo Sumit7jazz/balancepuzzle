@@ -37,24 +37,36 @@ public sealed class StoneSelector : MonoBehaviour
     {
         if (raycastCamera == null)
             raycastCamera = Camera.main;
+
+        if (inputReader == null)
+            Debug.LogError("StoneSelector: InputReader is not assigned.", this);
+        if (levelController == null)
+            Debug.LogError("StoneSelector: LevelController is not assigned.", this);
+        if (stepLockManager == null)
+            Debug.LogError("StoneSelector: StepLockManager is not assigned.", this);
     }
 
     private void OnEnable()
     {
-        inputReader.SelectPerformed += HandleSelect;
+        if (inputReader != null)
+            inputReader.SelectPerformed += HandleSelect;
         if (levelReset != null)
             levelReset.ResetRequested += ResetState;
     }
 
     private void OnDisable()
     {
-        inputReader.SelectPerformed -= HandleSelect;
+        if (inputReader != null)
+            inputReader.SelectPerformed -= HandleSelect;
         if (levelReset != null)
             levelReset.ResetRequested -= ResetState;
     }
 
     private void HandleSelect(Vector2 screenPosition)
     {
+        if (levelController == null || stepLockManager == null)
+            return;
+
         // Presses that begin on UI must not affect selection.
         if (IsPointerOverUI(screenPosition))
             return;

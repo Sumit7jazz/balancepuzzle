@@ -48,30 +48,59 @@ public sealed class LevelController : MonoBehaviour
 
     public event Action<LevelState> StateChanged;
 
+    private void Awake()
+    {
+        if (levelReset == null)
+            Debug.LogError("LevelController: LevelReset is not assigned.", this);
+        if (stabilityEvaluator == null)
+            Debug.LogError("LevelController: StabilityEvaluator is not assigned.", this);
+        if (stepLockManager == null)
+            Debug.LogError("LevelController: StepLockManager is not assigned.", this);
+        if (levelTimer == null)
+            Debug.LogError("LevelController: LevelTimer is not assigned.", this);
+    }
+
     private void OnEnable()
     {
-        levelReset.ResetRequested += ResetState;
-        stabilityEvaluator.StabilityPassed += OnStabilityPassed;
-        stabilityEvaluator.EvaluationFailed += OnEvaluationFailed;
-        stepLockManager.StoneLocked += OnStoneLocked;
-        stepLockManager.AllStepsLocked += OnAllStepsLocked;
-        levelTimer.TimerExpired += OnTimerExpired;
+        if (levelReset != null)
+            levelReset.ResetRequested += ResetState;
+        if (stabilityEvaluator != null)
+        {
+            stabilityEvaluator.StabilityPassed += OnStabilityPassed;
+            stabilityEvaluator.EvaluationFailed += OnEvaluationFailed;
+        }
+        if (stepLockManager != null)
+        {
+            stepLockManager.StoneLocked += OnStoneLocked;
+            stepLockManager.AllStepsLocked += OnAllStepsLocked;
+        }
+        if (levelTimer != null)
+            levelTimer.TimerExpired += OnTimerExpired;
     }
 
     private void OnDisable()
     {
-        levelReset.ResetRequested -= ResetState;
-        stabilityEvaluator.StabilityPassed -= OnStabilityPassed;
-        stabilityEvaluator.EvaluationFailed -= OnEvaluationFailed;
-        stepLockManager.StoneLocked -= OnStoneLocked;
-        stepLockManager.AllStepsLocked -= OnAllStepsLocked;
-        levelTimer.TimerExpired -= OnTimerExpired;
+        if (levelReset != null)
+            levelReset.ResetRequested -= ResetState;
+        if (stabilityEvaluator != null)
+        {
+            stabilityEvaluator.StabilityPassed -= OnStabilityPassed;
+            stabilityEvaluator.EvaluationFailed -= OnEvaluationFailed;
+        }
+        if (stepLockManager != null)
+        {
+            stepLockManager.StoneLocked -= OnStoneLocked;
+            stepLockManager.AllStepsLocked -= OnAllStepsLocked;
+        }
+        if (levelTimer != null)
+            levelTimer.TimerExpired -= OnTimerExpired;
     }
 
     private void Start()
     {
         ResetState();
-        levelTimer.SetRunning(true);
+        if (levelTimer != null)
+            levelTimer.SetRunning(true);
     }
 
     /// <summary>
@@ -85,7 +114,8 @@ public sealed class LevelController : MonoBehaviour
 
         CandidateStone = releasedStone;
         SetState(LevelState.Evaluating);
-        stabilityEvaluator.BeginEvaluation();
+        if (stabilityEvaluator != null)
+            stabilityEvaluator.BeginEvaluation();
     }
 
     private void OnStabilityPassed()
@@ -93,7 +123,8 @@ public sealed class LevelController : MonoBehaviour
         if (State != LevelState.Evaluating || CandidateStone == null)
             return;
 
-        stepLockManager.TryLockCandidate(CandidateStone);
+        if (stepLockManager != null)
+            stepLockManager.TryLockCandidate(CandidateStone);
     }
 
     private void OnStoneLocked(GameObject stone)
@@ -113,7 +144,8 @@ public sealed class LevelController : MonoBehaviour
             return;
 
         CandidateStone = null;
-        levelTimer.SetRunning(false);
+        if (levelTimer != null)
+            levelTimer.SetRunning(false);
         SetState(LevelState.Complete);
     }
 
@@ -128,7 +160,8 @@ public sealed class LevelController : MonoBehaviour
 
         FailReason = reason ?? string.Empty;
         CandidateStone = null;
-        levelTimer.SetRunning(false);
+        if (levelTimer != null)
+            levelTimer.SetRunning(false);
         SetState(LevelState.Failed);
     }
 
