@@ -68,7 +68,7 @@ public sealed class LevelTimer : MonoBehaviour
 
     private void Update()
     {
-        if (!running || config == null)
+        if (!running || config == null || levelController == null)
             return;
 
         // The LevelController also stops the timer on Complete/Failed; this

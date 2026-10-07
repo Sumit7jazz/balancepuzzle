@@ -56,8 +56,10 @@ public sealed class StoneState : MonoBehaviour
     /// <summary>Restores this stone's own initial state. Invoked via the reset event.</summary>
     public void ResetState()
     {
-        transform.position = initialPosition;
-        transform.rotation = initialRotation;
+        // Teleport via the Rigidbody API (not Transform) — the documented-correct
+        // way to move a physics body without fighting the simulation.
+        body.position = initialPosition;
+        body.rotation = initialRotation;
 
         body.isKinematic = initialIsKinematic;
         body.useGravity = initialUseGravity;

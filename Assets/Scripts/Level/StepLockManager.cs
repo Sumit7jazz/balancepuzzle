@@ -85,8 +85,10 @@ public sealed class StepLockManager : MonoBehaviour
         StoneLocked?.Invoke(candidate);
 
         int stepIndex = lockedStones.Count - 1;
-        if (stepIndex >= 0 && stepIndex < config.stepTimeBonuses.Length)
+        if (levelTimer != null && stepIndex >= 0 && stepIndex < config.stepTimeBonuses.Length)
             levelTimer.AddBonus(config.stepTimeBonuses[stepIndex]);
+        else if (levelTimer == null)
+            Debug.LogError("StepLockManager: LevelTimer is not assigned; bonus skipped.", this);
         else
             Debug.LogError("StepLockManager: no bonus configured for step index " + stepIndex + ".", this);
 

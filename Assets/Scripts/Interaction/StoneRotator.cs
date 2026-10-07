@@ -34,7 +34,9 @@ public sealed class StoneRotator : MonoBehaviour
 
     private void Update()
     {
-        if (config == null || !dragger.IsDragging)
+        if (config == null || dragger == null || inputReader == null || selector == null)
+            return;
+        if (!dragger.IsDragging)
             return;
 
         float axis = inputReader.RotateAxis;

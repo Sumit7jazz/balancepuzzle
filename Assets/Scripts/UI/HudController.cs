@@ -274,7 +274,7 @@ public sealed class HudController : MonoBehaviour
         var down = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
         down.callback.AddListener(_ => onDown());
         var up = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
-        up.callback.AddListener(_ => up());
+        up.callback.AddListener(_ => onUp());
         trigger.triggers.Add(down);
         trigger.triggers.Add(up);
     }
