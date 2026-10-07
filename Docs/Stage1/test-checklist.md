@@ -1,0 +1,201 @@
+# Stage 1 — Test Checklist
+
+Branch: `stage-1-development`
+Status: **TESTING IN PROGRESS — blocked on Unity Editor environment**
+
+All interactive tests below require the Unity Editor (Unity 6 LTS / 6000.x)
+with Universal RP + Input System. They were NOT executed in this environment
+because no Unity Editor is available here. Each is marked **BLOCKED** with the
+reason, so the tester (on a machine with Unity) can run them in order.
+
+Static (non-Unity) verification that WAS performed is listed in
+"Static review results" at the end.
+
+Result codes: `PASS` / `FAIL` / `BLOCKED` / `NOT APPLICABLE`
+
+---
+
+## A. Environment
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-ENV-01 | Unity 6 LTS / 6000.x | BLOCKED | — | No Unity Editor in this environment. Verify on test machine. |
+| ST-ENV-02 | Universal RP installed and active | BLOCKED | — | Install per Docs/Stage1/unity-setup.md |
+| ST-ENV-03 | Input System installed and active | BLOCKED | — | Install per Docs/Stage1/unity-setup.md |
+| ST-ENV-04 | Physics Solver Iterations = 8 | BLOCKED | — | ProjectSettings must be checked in Editor |
+| ST-ENV-05 | No unapproved packages | BLOCKED | — | Check Package Manager in Editor |
+| ST-ENV-06 | Stage1Config asset exists and assigned | BLOCKED | — | Asset exists at Assets/ScriptableObjects/Stage1/Stage1Config.asset (verified in repo); assignment check needs Editor |
+
+## B. Compilation
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-CMP-01 | Full project compile, 0 errors | BLOCKED | — | Needs Unity compile. Real C# syntax parse of all 17 scripts: PASS (see Static review). |
+| ST-CMP-02 | No missing script components | BLOCKED | — | Scene YAML validated structurally; Unity acceptance unverified |
+| ST-CMP-03 | No missing serialized references | BLOCKED | — | All fileID/GUID refs resolve statically; Unity acceptance unverified |
+| ST-CMP-04 | No runtime exception on entering Play Mode | BLOCKED | — | |
+
+## C. Scene / References
+
+All items below: **BLOCKED** — verify in Editor after running
+`Balance Puzzle → Finalize Stage 1 Assets` once and saving the scene.
+- Main Camera, Directional Light, Platform, 4 spawn pads, 4 stones,
+  Managers, UI, Debug COM visualization, EventSystem (or runtime-created).
+- Each stone has Rigidbody, BoxCollider, StoneState, CenterOfMass, ContactTracker.
+- No stone uses MeshCollider.
+- InputReader action references assigned (via finalizer).
+
+## D. Physics
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-PHY-01 | Drop Stone A: falls, collides, settles, no jitter | BLOCKED | — | |
+| ST-PHY-02 | Drop Stone B: COM offset affects behavior | BLOCKED | — | |
+| ST-PHY-03 | Drop Stone C: configured COM offset applied | BLOCKED | — | |
+| ST-PHY-04 | Drop Stone D: mass + COM configuration | BLOCKED | — | |
+| ST-PHY-05 | Mass difference push/contact experiment | BLOCKED | — | |
+| ST-PHY-06 | Stack stones: no interpenetration, no explosion | BLOCKED | — | |
+| ST-PHY-07 | Platform friction feels reasonable | BLOCKED | — | Record feel; do not change values during testing |
+
+## E. Selection
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-INT-01 | Tap/click stone selects it | BLOCKED | — | |
+| ST-INT-02 | Tap empty space selects nothing | BLOCKED | — | |
+| ST-INT-03 | Tap UI does not select stone behind UI | BLOCKED | — | StoneSelector.IsPointerOverUI guards this (static review) |
+| ST-INT-04 | Locked stone cannot be selected | BLOCKED | — | `!stepLockManager.IsLocked(hitStone)` guard (static review) |
+
+## F. Dragging
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-INT-05 | Drag follows pointer on XZ, smooth, no physics fight | BLOCKED | — | Kinematic + MovePosition in FixedUpdate (static review) |
+| ST-INT-06 | Drag clamped to dragRadius (6) | BLOCKED | — | Clamp in FixedUpdate (static review) |
+| ST-INT-07 | Release: dynamic again, wakes, settles, evaluation begins | BLOCKED | — | isKinematic=false + WakeUp + BeginEvaluation (static review) |
+
+## G. Rotation
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-ROT-01 | Q rotates around Y only | BLOCKED | — | Requires finalizer input wiring first |
+| ST-ROT-02 | E rotates opposite direction | BLOCKED | — | |
+| ST-ROT-03 | Rotate Left UI button = same path as Q | BLOCKED | — | Both feed InputReader.SetRotateAxis (static review) |
+| ST-ROT-04 | Rotate Right UI button = same path as E | BLOCKED | — | |
+| ST-ROT-05 | Keyboard and UI rotation identical speed/direction | BLOCKED | — | Single RotateAxis path (static review) |
+
+## H. Stability
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-STB-01 | Stable placement: calm 2s → PASS | BLOCKED | — | |
+| ST-STB-02 | Disturb during evaluation → calm timer resets | BLOCKED | — | Note: selection/drag are gated to Placing state, so disturb by releasing the stone onto the structure |
+| ST-STB-03 | Thresholds 0.08 m/s linear, 0.20 rad/s angular | BLOCKED | — | Do not change during testing |
+| ST-STB-04 | Hard impact (>1.5 m/s) resets calm evaluation | BLOCKED | — | |
+| ST-STB-05 | Stone below killY (-3) → LEVEL FAILED / Stone Fell | BLOCKED | — | |
+| ST-STB-06 | COM overhang, still but unsupported → NO PASS (mandatory) | BLOCKED | — | |
+| ST-STB-07 | Valid supported placement → PASS (no false rejection) | BLOCKED | — | |
+| ST-STB-08 | Whole-structure calmness; only candidate locks | BLOCKED | — | |
+
+## I. Step Lock
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-STEP-01 | Pass → candidate kinematic+locked, StoneLocked fires, visual | BLOCKED | — | |
+| ST-STEP-02 | Locked stone cannot be moved | BLOCKED | — | |
+| ST-STEP-03 | Candidate-only lock (A locks, B stays unlocked) | BLOCKED | — | |
+| ST-STEP-04 | Bonuses exactly 2/3/5/7 from config | BLOCKED | — | No hard-coded replacement acceptable |
+| ST-STEP-05 | Timer stacks above 120, never exceeds 150 | BLOCKED | — | |
+| ST-STEP-06 | Four locks → LEVEL COMPLETE, no 5th step | BLOCKED | — | |
+
+## J. Timer
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-TIME-01 | Fresh level starts at 120s | BLOCKED | — | **BUG-001 (timer started at 0) found and fixed in static review** — must verify in Play Mode |
+| ST-TIME-02 | Timer decreases in real seconds | BLOCKED | — | |
+| ST-TIME-03 | Step completion adds correct bonus | BLOCKED | — | |
+| ST-TIME-04 | timeLeft > 120 possible, <= 150 enforced | BLOCKED | — | |
+| ST-TIME-05 | Timer reaches 0 → LEVEL FAILED / Time Up | BLOCKED | — | |
+| ST-TIME-06 | Timer stops after Complete/Failed | BLOCKED | — | |
+| ST-TIME-07 | Exactly one countdown authority | BLOCKED | — | LevelTimer only (static review: no other countdown code) |
+
+## K. Reset
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-RST-01 | Reset restores everything (spawns, dynamics, locks, visuals, timer 120, steps 0, HUD) | BLOCKED | — | |
+| ST-RST-02 | Reset during evaluation clears it; no delayed pass | BLOCKED | — | |
+| ST-RST-03 | Reset after fail → fresh level | BLOCKED | — | |
+| ST-RST-04 | Reset after complete → fresh level | BLOCKED | — | |
+| ST-RST-05 | Immediate replay works normally | BLOCKED | — | |
+
+## L. Lock Presentation
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-PRES-01 | Lock → tint appears | BLOCKED | — | |
+| ST-PRES-02 | Reset → normal material returns | BLOCKED | — | |
+| ST-PRES-03 | Presenter disabled → gameplay locking still works | BLOCKED | — | Decoupling proof |
+
+## M. COM Visualization
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-COM-01 | Stone A marker at configured center | BLOCKED | — | Scene view gizmos |
+| ST-COM-02 | B/C/D markers match offsets | BLOCKED | — | |
+| ST-COM-03 | Marker moves with Rigidbody while dragging | BLOCKED | — | |
+| ST-COM-04 | Visualizer removed → gameplay unaffected | BLOCKED | — | |
+
+## N. HUD
+
+**Result: BLOCKED** — verify in Play Mode:
+- Timer shows LevelTimer.TimeLeft; Steps show "Locked: N / 4" and update.
+- Messages communicate placement / evaluation / lock / failure / completion.
+- Result panel hidden during play, visible after Complete/Failed.
+- Reset button calls only LevelReset.RequestReset().
+- HUD never becomes a second game-state authority (static review: it only
+  subscribes to events and writes text/buttons).
+
+## O. Android Touch Smoke Test
+
+| Test ID | Description | Result | Observed behavior | Notes |
+|---|---|---|---|---|
+| ST-DEV-01 | Touch-select | BLOCKED | — | Requires Android build from test machine |
+| ST-DEV-02 | Touch-drag | BLOCKED | — | |
+| ST-DEV-03 | Touch-release | BLOCKED | — | |
+| ST-DEV-04 | Rotate Left button | BLOCKED | — | |
+| ST-DEV-05 | Rotate Right button | BLOCKED | — | |
+| ST-DEV-06 | Reset | BLOCKED | — | |
+
+---
+
+## Static review results (performed without Unity)
+
+These do not replace Play Mode tests, but they are real checks with real tools:
+
+1. **BUG-001 (CRITICAL, fixed):** `LevelTimer.TimeLeft` was never initialized
+   outside `ResetState()` (reset-event only). `LevelController.Start()` called
+   `SetRunning(true)` with `TimeLeft == 0`, so the timer would expire on the
+   first frame — every fresh level would instantly fail with "Time up."
+   Fix: initialize `TimeLeft` from `config.initialTime` in `LevelTimer.Awake()`
+   (commit 2101af9). No gameplay numbers changed.
+   Retest required in Play Mode: ST-TIME-01, ST-TIME-02, ST-RST-01.
+
+2. **C# syntax:** all 17 scripts parsed with a real C# grammar (tree-sitter):
+   0 syntax errors.
+
+3. **Scene/prefab YAML:** all 12 asset files — every local fileID resolves,
+   every GUID has a .meta, every script reference maps to a real script,
+   28 GameObjects / 28 Transforms with consistent parents/children/back-refs,
+   no duplicate fileIDs.
+
+4. **Logic review:** selection/drag/rotation gating (Placing-only, locked-stone
+   exclusion, UI pointer rejection), drag plane + radius clamp, release →
+   dynamic + BeginEvaluation, calm-time + velocity + impact + killY + COM-support
+   evaluation, candidate-only lock, 2/3/5/7 bonuses from config, 150 cap,
+   event-driven reset across all systems, single countdown authority
+   (LevelTimer), presentation decoupled from locking — all match the approved
+   Stage 1 contract. No additional defects found.
+
+5. **Secrets scan:** PASS (no secrets in new/changed files).
