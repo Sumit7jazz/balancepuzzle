@@ -24,7 +24,6 @@ namespace BalancePuzzle.Editor
     {
         private const string InputActionsPath = "Assets/Input/Stage1Input.inputactions";
         private const string InputRefsFolder = "Assets/Input/References";
-        private const string MaterialsFolder = "Assets/Materials/Stage1";
 
         [MenuItem("Balance Puzzle/Finalize Stage 1 Assets")]
         public static void FinalizeAssets()
@@ -113,7 +112,13 @@ namespace BalancePuzzle.Editor
             return true;
         }
 
-        private static void FixMaterialShaders()
+        /// <summary>
+        /// Fixes the shader on all Stage 1 materials. Public so the asset
+        /// postprocessor can invoke it automatically on import.
+        /// Uses explicit paths (not type search) so it works even if the
+        /// materials failed to import previously and aren't indexed.
+        /// </summary>
+        public static void FixMaterialShaders()
         {
             var shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null)
@@ -123,15 +128,22 @@ namespace BalancePuzzle.Editor
                 return;
             }
 
-            int fixedCount = 0;
-            foreach (var guid in AssetDatabase.FindAssets("t:Material", new[] { MaterialsFolder }))
+            string[] materialPaths = new[]
             {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
+                "Assets/Materials/Stage1/Platform.mat",
+                "Assets/Materials/Stage1/Stone_Default.mat",
+                "Assets/Materials/Stage1/Stone_Locked.mat",
+            };
+
+            int fixedCount = 0;
+            foreach (var path in materialPaths)
+            {
                 var material = AssetDatabase.LoadAssetAtPath<Material>(path);
                 if (material == null)
                 {
                     Debug.LogError("[Balance Puzzle] Could not load material at " + path +
-                        " — the .mat file may have malformed YAML. Check the console for import errors.");
+                        " — the .mat file may have malformed YAML or failed import. " +
+                        "Try right-click → Reimport on the file, then run Finalize again.");
                     continue;
                 }
                 if (material.shader != shader)
@@ -145,6 +157,59 @@ namespace BalancePuzzle.Editor
 
             if (fixedCount == 0)
                 Debug.Log("[Balance Puzzle] All Stage 1 materials already use URP/Lit.");
+        }
+    }
+
+    /// <summary>
+    /// Automatically repairs Stage 1 material shaders whenever the .mat files
+    /// are imported. This makes the shader fix automatic — the manual
+    /// "Finalize Stage 1 Assets" menu item is no longer strictly required for
+    /// materials (it is still needed for InputReader wiring on first setup).
+    /// </summary>
+    public class Stage1MaterialPostprocessor : AssetPostprocessor
+    {
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets, string[] deletedAssets,
+            string[] movedAssets, string[] movedFromAssetPaths)
+        {
+            foreach (var path in importedAssets)
+            {
+                if (path.StartsWith("Assets/Materials/Stage1/") && path.EndsWith(".mat"))
+                {
+                    // Defer until after the import pipeline completes.
+                    EditorApplication.delayCall += () =>
+                    {
+                        Debug.Log("[Balance Puzzle] Stage 1 material changed; auto-fixing shader.");
+                        Stage1AssetFinalizer.FixMaterialShaders();
+                        AssetDatabase.SaveAssets();
+                    };
+                    break;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Guarantees Stage 1 materials use the correct shader before Play Mode
+    /// starts. This is the ultimate safety net: even if the .mat assets were
+    /// never properly fixed (e.g. the Finalize step was skipped), entering
+    /// Play Mode will repair them automatically.
+    /// </summary>
+    [InitializeOnLoad]
+    public static class Stage1PlayModeMaterialFixer
+    {
+        static Stage1PlayModeMaterialFixer()
+        {
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.ExitingEditMode)
+            {
+                Stage1AssetFinalizer.FixMaterialShaders();
+                AssetDatabase.SaveAssets();
+            }
         }
     }
 }
