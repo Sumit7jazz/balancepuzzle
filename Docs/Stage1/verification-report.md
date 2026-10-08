@@ -201,3 +201,33 @@ static defects. **Do not lock yet.** The remaining work is exactly the Unity
 Play Mode pass defined in `Docs/Stage1/test-checklist.md`, with priority on
 the retests listed in §4 above. After that pass, this report plus the filled
 checklist form the basis for the lock decision.
+
+## 10. Final pre-MCP hardening batch (2026-10-08, commit pending)
+
+**State-machine audit:** `LevelController.Fail()` now stops the
+`StabilityEvaluator` (previously, a timer-expiry during `Evaluating` left the
+evaluator running its FixedUpdate until reset — wasteful, though the
+controller's state guard prevented incorrect locks).
+
+**Hardening (no gameplay behavior change in normal flow):**
+- `StoneDragger.HandleRelease`: null-guard `levelController` before
+  `BeginEvaluation`.
+- `LevelController.OnStabilityPassed`: `TryLockCandidate == false` now logs
+  and fails the evaluation instead of soft-locking in `Evaluating`.
+- `HudController`: null-guards in Reset/Play-Again/Rotate button lambdas;
+  timer text cached to avoid per-frame string allocation on mobile.
+- New editor tool: `Balance Puzzle → Check Stage 1 Health` (read-only
+  wiring + config contract validation).
+- New static regression: `Tools/check_stage1_regression.py` validates
+  BUG-001–006 fixes and contract values; BUG-007 stays runtime-BLOCKED.
+
+**Static verification:** all C# files structurally sound; all material GUIDs
+32-char; all stone roots at scale (1,1,1); no secrets; contract values match.
+
+**BUG-007:** still OPEN. Root cause not proven. The hardened diagnostic
+(`Balance Puzzle → Diagnose BUG-007 Materials`, sections A–F) is the
+instrument for the Unity MCP pass. No speculative fix applied.
+
+**Recommendation unchanged: NOT READY FOR LOCK.** The Unity MCP runtime pass
+(health check → BUG-007 diagnostic → full Play Mode checklist) is the next
+required step.

@@ -174,6 +174,11 @@ public sealed class LevelController : MonoBehaviour
         CandidateStone = null;
         if (levelTimer != null)
             levelTimer.SetRunning(false);
+        // Stop the evaluator: without this, a timer-expiry during Evaluating
+        // leaves StabilityEvaluator running (wasting FixedUpdate) until reset.
+        // (Evaluator-initiated failures already stopped it via its own Fail.)
+        if (stabilityEvaluator != null)
+            stabilityEvaluator.ResetState();
         SetState(LevelState.Failed);
     }
 
