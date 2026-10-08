@@ -25,6 +25,13 @@ namespace BalancePuzzle.Editor
         private const string InputActionsPath = "Assets/Input/Stage1Input.inputactions";
         private const string InputRefsFolder = "Assets/Input/References";
 
+        /// <summary>
+        /// Human-readable record of the most recent FixMaterialShaders call:
+        /// whether it ran, which shader it used, how many materials changed.
+        /// Read-only report; consumed by the BUG-007 diagnostic (section F).
+        /// </summary>
+        public static string LastFixReport { get; private set; }
+
         [MenuItem("Balance Puzzle/Finalize Stage 1 Assets")]
         public static void FinalizeAssets()
         {

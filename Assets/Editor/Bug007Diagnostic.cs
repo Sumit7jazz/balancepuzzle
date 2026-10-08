@@ -12,6 +12,14 @@ namespace BalancePuzzle.Editor
     ///
     /// This does NOT modify anything — it only reports. Use the output to
     /// determine the concrete root cause before implementing a fix.
+    ///
+    /// Covers:
+    ///   A. Shader availability (Find result, name, instance validity)
+    ///   B. Pipeline (GraphicsSettings, QualitySettings, active pipeline)
+    ///   C. Materials (every Stage 1 material: load, shader, raw YAML)
+    ///   D. Platform (GameObject, renderer, sharedMaterials, shaders)
+    ///   E. Stones (all four Visual children)
+    ///   F. Fixer execution (whether auto-fixers ran and what they did)
     /// </summary>
     public static class Bug007Diagnostic
     {
@@ -20,108 +28,117 @@ namespace BalancePuzzle.Editor
         {
             Debug.Log("========== BUG-007 DIAGNOSTIC START ==========");
 
-            // 1. Shader.Find result
+            // ---- A. Shader availability ----
             var litShader = Shader.Find("Universal Render Pipeline/Lit");
-            Debug.Log($"[DIAG] Shader.Find(\"Universal Render Pipeline/Lit\") => " +
-                (litShader == null ? "NULL" : $"found, name='{litShader.name}'"));
+            Debug.Log("[DIAG-A] Shader.Find(\"Universal Render Pipeline/Lit\") => " +
+                (litShader == null ? "NULL" : $"found, name='{litShader.name}', instanceID={litShader.GetInstanceID()}"));
+            if (litShader != null)
+            {
+                // Instance validity: a destroyed/null shader reports differently.
+                bool isValid = litShader.name == "Universal Render Pipeline/Lit";
+                Debug.Log($"[DIAG-A] Shader instance valid (name matches): {isValid}");
+            }
 
-            // 2. Render pipeline configuration
+            // ---- B. Pipeline ----
             var gfxPipeline = GraphicsSettings.currentRenderPipeline;
-            Debug.Log($"[DIAG] GraphicsSettings.currentRenderPipeline => " +
-                (gfxPipeline == null ? "NULL (Built-in RP)" : $"'{gfxPipeline.name}' ({gfxPipeline.GetType().Name})"));
+            Debug.Log("[DIAG-B] GraphicsSettings.currentRenderPipeline => " +
+                (gfxPipeline == null
+                    ? "NULL — project is using Built-in Render Pipeline"
+                    : $"'{gfxPipeline.name}' (type: {gfxPipeline.GetType().FullName})"));
 
             var qualityPipeline = QualitySettings.renderPipeline;
-            Debug.Log($"[DIAG] QualitySettings.renderPipeline => " +
-                (qualityPipeline == null ? "NULL" : $"'{qualityPipeline.name}'"));
+            Debug.Log("[DIAG-B] QualitySettings.renderPipeline => " +
+                (qualityPipeline == null ? "NULL (inherits GraphicsSettings)" : $"'{qualityPipeline.name}'"));
 
-            var activePipeline = RenderPipelineManager.currentPipeline;
-            Debug.Log($"[DIAG] RenderPipelineManager.currentPipeline => " +
-                (activePipeline == null ? "NULL (not in Play Mode or Built-in)" : $"'{activePipeline.GetType().Name}'"));
+            var defaultPipeline = GraphicsSettings.defaultRenderPipeline;
+            Debug.Log("[DIAG-B] GraphicsSettings.defaultRenderPipeline => " +
+                (defaultPipeline == null ? "NULL" : $"'{defaultPipeline.name}'"));
 
-            // 3. Material assets: load, report shader before/after
+            bool isUrpActive = gfxPipeline != null && gfxPipeline.GetType().FullName.Contains("Universal");
+            Debug.Log($"[DIAG-B] URP confirmed active: {isUrpActive}");
+
+            // ---- C. Materials ----
             string[] materialPaths = new[]
             {
                 "Assets/Materials/Stage1/Platform.mat",
                 "Assets/Materials/Stage1/Stone_Default.mat",
                 "Assets/Materials/Stage1/Stone_Locked.mat",
             };
-
             foreach (var path in materialPaths)
             {
                 var material = AssetDatabase.LoadAssetAtPath<Material>(path);
                 if (material == null)
                 {
-                    Debug.LogError($"[DIAG] FAILED to load material at {path}. " +
-                        "The .mat file may have malformed YAML or a failed import. " +
-                        "Check the Inspector for import errors on this file.");
+                    Debug.LogError($"[DIAG-C] FAILED to load '{path}'. " +
+                        "Malformed YAML or failed import. Right-click → Reimport the file.");
                     continue;
                 }
-
                 string shaderName = material.shader != null ? material.shader.name : "NULL";
-                Debug.Log($"[DIAG] Material '{path}': loaded OK, current shader = '{shaderName}'");
-
-                // Report the raw YAML shader line for forensics
-                var yamlLines = System.IO.File.ReadAllLines(path);
-                foreach (var line in yamlLines)
+                Debug.Log($"[DIAG-C] '{path}': loaded OK, shader='{shaderName}'");
+                foreach (var line in System.IO.File.ReadAllLines(path))
                 {
                     if (line.Contains("m_Shader:"))
                     {
-                        Debug.Log($"[DIAG]   Raw YAML: {line.Trim()}");
+                        Debug.Log($"[DIAG-C]   raw YAML: {line.Trim()}");
                         break;
                     }
                 }
             }
 
-            // 4. Scene platform renderer: what material/shader is ACTUALLY used?
+            // ---- D. Platform ----
             var platformGo = GameObject.Find("Platform");
             if (platformGo == null)
             {
-                Debug.LogWarning("[DIAG] GameObject 'Platform' not found in open scene. Open Stage1_Sandbox first.");
+                Debug.LogWarning("[DIAG-D] 'Platform' not found. Open Stage1_Sandbox first.");
             }
             else
             {
-                var renderer = platformGo.GetComponent<MeshRenderer>();
-                if (renderer == null)
+                var renderer = platformGo.GetComponent<Renderer>();
+                Debug.Log($"[DIAG-D] Platform renderer type: {(renderer == null ? "NONE" : renderer.GetType().Name)}");
+                if (renderer != null)
                 {
-                    Debug.LogWarning("[DIAG] Platform has no MeshRenderer.");
-                }
-                else
-                {
-                    Debug.Log($"[DIAG] Platform MeshRenderer found. sharedMaterials count = {renderer.sharedMaterials.Length}");
                     for (int i = 0; i < renderer.sharedMaterials.Length; i++)
                     {
                         var mat = renderer.sharedMaterials[i];
-                        if (mat == null)
-                        {
-                            Debug.LogError($"[DIAG]   Slot {i}: NULL material!");
-                        }
-                        else
-                        {
-                            string sName = mat.shader != null ? mat.shader.name : "NULL";
-                            Debug.Log($"[DIAG]   Slot {i}: material='{mat.name}', shader='{sName}'");
-                        }
+                        string mName = mat != null ? mat.name : "NULL";
+                        string sName = mat != null && mat.shader != null ? mat.shader.name : "NULL";
+                        Debug.Log($"[DIAG-D]   slot {i}: material='{mName}', shader='{sName}'");
                     }
                 }
             }
 
-            // 5. Stone visual renderers (spot check one)
-            var stoneGo = GameObject.Find("Stone_A");
-            if (stoneGo != null)
+            // ---- E. Stones (all four Visual children) ----
+            foreach (var stoneName in new[] { "Stone_A", "Stone_B", "Stone_C", "Stone_D" })
             {
-                var visual = stoneGo.transform.Find("Visual");
-                if (visual != null)
+                var stoneGo = GameObject.Find(stoneName);
+                if (stoneGo == null)
                 {
-                    var r = visual.GetComponent<MeshRenderer>();
-                    if (r != null && r.sharedMaterial != null)
-                    {
-                        string sName = r.sharedMaterial.shader != null ? r.sharedMaterial.shader.name : "NULL";
-                        Debug.Log($"[DIAG] Stone_A/Visual: material='{r.sharedMaterial.name}', shader='{sName}'");
-                    }
+                    Debug.LogWarning($"[DIAG-E] '{stoneName}' not found.");
+                    continue;
                 }
+                var visual = stoneGo.transform.Find("Visual");
+                if (visual == null)
+                {
+                    Debug.LogWarning($"[DIAG-E] '{stoneName}/Visual' child not found.");
+                    continue;
+                }
+                var r = visual.GetComponent<MeshRenderer>();
+                if (r == null || r.sharedMaterial == null)
+                {
+                    Debug.LogWarning($"[DIAG-E] '{stoneName}/Visual' has no material.");
+                    continue;
+                }
+                string sName = r.sharedMaterial.shader != null ? r.sharedMaterial.shader.name : "NULL";
+                Debug.Log($"[DIAG-E] '{stoneName}/Visual': material='{r.sharedMaterial.name}', shader='{sName}'");
             }
+
+            // ---- F. Fixer execution ----
+            string lastFix = Stage1AssetFinalizer.LastFixReport;
+            Debug.Log("[DIAG-F] Stage1AssetFinalizer.LastFixReport => " +
+                (string.IsNullOrEmpty(lastFix) ? "(no fix attempt recorded this session)" : lastFix));
 
             Debug.Log("========== BUG-007 DIAGNOSTIC END ==========");
-            Debug.Log("[DIAG] Copy the above lines and send them back for root-cause analysis.");
+            Debug.Log("[DIAG] Copy all [DIAG-*] lines and send them back for root-cause analysis.");
         }
     }
 }
