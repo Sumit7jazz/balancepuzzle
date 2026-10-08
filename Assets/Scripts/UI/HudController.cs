@@ -31,6 +31,11 @@ public sealed class HudController : MonoBehaviour
     private GameObject resultPanel;
     private Text resultText;
 
+    // Cache for the timer display: the text only changes at 10 Hz (one decimal
+    // place), so skip the string allocation on frames where it is identical.
+    // Minor GC-pressure reduction for mobile.
+    private string lastTimerString;
+
     private void Awake()
     {
         EnsureEventSystem();
@@ -112,8 +117,14 @@ public sealed class HudController : MonoBehaviour
 
     private void RefreshTimerText(float timeLeft)
     {
-        if (timerText != null)
-            timerText.text = $"Time: {timeLeft:0.0}";
+        if (timerText == null)
+            return;
+        string text = $"Time: {timeLeft:0.0}";
+        if (text != lastTimerString)
+        {
+            lastTimerString = text;
+            timerText.text = text;
+        }
     }
 
     private void RefreshStepText()
@@ -176,19 +187,25 @@ public sealed class HudController : MonoBehaviour
         // Bottom-right: reset.
         var resetButton = CreateButton("ResetButton", "Reset",
             new Vector2(-140f, 130f), new Vector2(220f, 110f), new Vector2(1f, 0f));
-        resetButton.onClick.AddListener(() => levelReset.RequestReset());
+        resetButton.onClick.AddListener(() =>
+        {
+            if (levelReset != null)
+                levelReset.RequestReset();
+            else
+                Debug.LogError("HudController: LevelReset is not assigned.", this);
+        });
 
         // Bottom-left: hold-to-rotate (feeds the single InputReader rotation axis).
         var rotateLeft = CreateButton("RotateLeftButton", "Left",
             new Vector2(140f, 130f), new Vector2(220f, 110f), new Vector2(0f, 0f));
         AddHoldHandler(rotateLeft.gameObject,
-            () => inputReader.SetRotateAxis(-1f),
-            () => inputReader.SetRotateAxis(0f));
+            () => { if (inputReader != null) inputReader.SetRotateAxis(-1f); },
+            () => { if (inputReader != null) inputReader.SetRotateAxis(0f); });
         var rotateRight = CreateButton("RotateRightButton", "Right",
             new Vector2(380f, 130f), new Vector2(220f, 110f), new Vector2(0f, 0f));
         AddHoldHandler(rotateRight.gameObject,
-            () => inputReader.SetRotateAxis(1f),
-            () => inputReader.SetRotateAxis(0f));
+            () => { if (inputReader != null) inputReader.SetRotateAxis(1f); },
+            () => { if (inputReader != null) inputReader.SetRotateAxis(0f); });
 
         // Center result panel (hidden until Complete/Failed).
         resultPanel = new GameObject("ResultPanel");
@@ -206,7 +223,11 @@ public sealed class HudController : MonoBehaviour
             new Vector2(0.5f, 0.5f));
         var playAgain = CreateButtonOn(resultPanel.transform, "PlayAgainButton", "Play Again",
             new Vector2(0f, -160f), new Vector2(320f, 110f), new Vector2(0.5f, 0.5f));
-        playAgain.onClick.AddListener(() => levelReset.RequestReset());
+        playAgain.onClick.AddListener(() =>
+        {
+            if (levelReset != null)
+                levelReset.RequestReset();
+        });
 
         resultPanel.SetActive(false);
     }

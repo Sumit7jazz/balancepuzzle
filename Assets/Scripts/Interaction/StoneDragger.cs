@@ -162,7 +162,10 @@ public sealed class StoneDragger : MonoBehaviour
         hasPointerPosition = false;
 
         StoneReleased?.Invoke(stone);
-        levelController.BeginEvaluation(stone);
+        if (levelController != null)
+            levelController.BeginEvaluation(stone);
+        else
+            Debug.LogError("StoneDragger: LevelController is not assigned; cannot begin evaluation.", this);
     }
 
     /// <summary>

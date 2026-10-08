@@ -237,14 +237,38 @@ These do not replace Play Mode tests, but they are real checks with real tools:
    font"). Fix: use `"LegacyRuntime.ttf"` (verified in Unity 6000.0.4f1).
    Retest required: ST-CMP-04, HUD suite.
 
-7. **Robustness hardening (commit c0a1977, no behavior change when wired
-   correctly):**
-   - `StoneState.ResetState`: teleports via `Rigidbody.position`/`rotation`
-     (the documented-correct API) instead of `Transform`.
-   - `LevelTimer.Update`, `StoneRotator.Update`: null-guard wired references
-     so a missing scene wire cannot throw per-frame.
-   - `StepLockManager.TryLockCandidate`: null-guard `levelTimer` before
-     `AddBonus`.
+7. **BUG-007 (HIGH, OPEN as of 2026-10-08):** Central platform mesh renders
+   magenta/pink in Play Mode despite 0 console errors/warnings. The malformed
+   shader GUID (BUG-005) was corrected and automatic repair hooks were added
+   (`Stage1MaterialPostprocessor`, `Stage1PlayModeMaterialFixer`, commit
+   5b4791e), but the pink mesh persisted in actual Play Mode testing.
+   Root cause NOT YET PROVEN — no speculative fix until evidence exists.
+   Diagnostic instrumentation provided (commit 9bf5cfb, hardened in 98300e4):
+   run **Balance Puzzle → Diagnose BUG-007 Materials** in Unity and return
+   the `[DIAG-*]` output. It reports Shader.Find result, pipeline
+   configuration, each material's loaded shader + raw YAML, the Platform
+   renderer's actual materials/shaders, all four stone Visuals, and whether
+   the auto-fixers ever ran. Hypotheses (unproven): stale Library/import
+   cache, URP pipeline asset not assigned, Shader.Find null, fixer not
+   executing, wrong material reference.
+   Retest required: full material/visual suite after root cause is proven
+   and fixed. Status: **BLOCKED** on diagnostic output.
+
+7. **Robustness hardening (2026-10-08):**
+   - `StoneDragger.HandleRelease`: null-guard `levelController` before
+     `BeginEvaluation` (HandleSelect already guarded; HandleRelease did not).
+   - `LevelController.OnStabilityPassed`: handle `TryLockCandidate` returning
+     false — log and fail the evaluation instead of silently soft-locking in
+     `Evaluating` state.
+   - `HudController` button callbacks: null-guard `levelReset`/`inputReader`
+     in Reset/Play-Again/Rotate lambdas so a missing wire logs instead of
+     throwing on click.
+   - `HudController.RefreshTimerText`: cache the displayed string; only
+     assign `Text.text` when the tenth-of-a-second value actually changes
+     (reduces per-frame string allocation on mobile).
+   - `Stage1AssetFinalizer.LastFixReport`: records whether/when the material
+     auto-fixers ran, for the BUG-007 diagnostic.
+   No gameplay behavior changes in the normal flow.
 
 5. **C# syntax:** all 17 scripts parsed with a real C# grammar (tree-sitter):
    0 syntax errors.

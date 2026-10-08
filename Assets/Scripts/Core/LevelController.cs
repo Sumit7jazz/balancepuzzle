@@ -124,7 +124,19 @@ public sealed class LevelController : MonoBehaviour
             return;
 
         if (stepLockManager != null)
-            stepLockManager.TryLockCandidate(CandidateStone);
+        {
+            // TryLockCandidate is defensive and can return false (e.g. candidate
+            // became invalid). Never ignore the result: a silent failure here
+            // would leave the game stuck in Evaluating with no evaluation running.
+            if (!stepLockManager.TryLockCandidate(CandidateStone))
+            {
+                Debug.LogError(
+                    "LevelController: TryLockCandidate failed for '" +
+                    CandidateStone.name + "'. Failing evaluation instead of soft-locking.",
+                    CandidateStone);
+                Fail("Lock failed.");
+            }
+        }
     }
 
     private void OnStoneLocked(GameObject stone)
