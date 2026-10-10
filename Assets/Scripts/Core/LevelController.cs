@@ -17,7 +17,7 @@ public enum LevelState
 ///
 /// Contracts used (implemented in later file groups):
 /// - StabilityEvaluator: events StabilityPassed (Action), EvaluationFailed (Action&lt;string&gt;);
-///   methods BeginEvaluation(), ResetState().
+///   methods BeginEvaluation(GameObject), ResetState().
 /// - StepLockManager: events StoneLocked (Action&lt;GameObject&gt;), AllStepsLocked (Action);
 ///   method TryLockCandidate(GameObject).
 /// - LevelTimer: event TimerExpired (Action); methods SetRunning(bool), ResetState().
@@ -115,7 +115,7 @@ public sealed class LevelController : MonoBehaviour
         CandidateStone = releasedStone;
         SetState(LevelState.Evaluating);
         if (stabilityEvaluator != null)
-            stabilityEvaluator.BeginEvaluation();
+            stabilityEvaluator.BeginEvaluation(releasedStone);
     }
 
     private void OnStabilityPassed()

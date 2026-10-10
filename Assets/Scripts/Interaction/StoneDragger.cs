@@ -93,9 +93,11 @@ public sealed class StoneDragger : MonoBehaviour
             return;
 
         // Take over: kinematic while held so physics never fights the drag.
-        body.isKinematic = true;
-        body.velocity = Vector3.zero;
+        // Zero velocities BEFORE switching to kinematic — writing velocity
+        // on a kinematic body logs a Unity warning and is ignored.
+        body.linearVelocity = Vector3.zero;
         body.angularVelocity = Vector3.zero;
+        body.isKinematic = true;
 
         draggedBody = body;
         dragHeight = stone.transform.position.y;

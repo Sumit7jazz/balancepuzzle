@@ -77,9 +77,11 @@ public sealed class StepLockManager : MonoBehaviour
         if (body == null || body.isKinematic)
             return false;
 
-        body.isKinematic = true;
-        body.velocity = Vector3.zero;
+        // Zero velocities BEFORE switching to kinematic — writing velocity
+        // on a kinematic body logs a Unity warning and is ignored.
+        body.linearVelocity = Vector3.zero;
         body.angularVelocity = Vector3.zero;
+        body.isKinematic = true;
         lockedStones.Add(candidate);
 
         StoneLocked?.Invoke(candidate);

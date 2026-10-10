@@ -1,0 +1,35 @@
+﻿{
+    "timestamp": "2026-10-09T22:22:43.0169691Z",
+    "status": "PASSED",
+    "totalTests": 4,
+    "passed": 4,
+    "failed": 0,
+    "totalErrors": 0,
+    "errors": [],
+    "results": [
+        {
+            "testName": "BotStacksStoneA_LocksAndAppliesBonus",
+            "status": "PASSED",
+            "durationSeconds": 3.96738600730896,
+            "errors": []
+        },
+        {
+            "testName": "ResetRestoresStoneSnapshots",
+            "status": "PASSED",
+            "durationSeconds": 0.3699216842651367,
+            "errors": []
+        },
+        {
+            "testName": "FellStoneFailsCleanlyWithoutNullReference",
+            "status": "PASSED",
+            "durationSeconds": 0.20123720169067383,
+            "errors": []
+        },
+        {
+            "testName": "TimerExpiryFailsCleanly",
+            "status": "PASSED",
+            "durationSeconds": 0.20532464981079102,
+            "errors": []
+        }
+    ]
+}

@@ -172,16 +172,16 @@ public sealed class HudController : MonoBehaviour
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         var scaler = canvasGo.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080f, 1920f);
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
         canvasGo.AddComponent<GraphicRaycaster>();
         canvasTransform = canvasGo.transform;
 
-        // Top bar (anchored top-center).
-        timerText = CreateText("TimerText", new Vector2(-330f, -70f), new Vector2(500f, 90f),
+        // Top bar (anchored top-center, kept inside 1920-wide reference).
+        timerText = CreateText("TimerText", new Vector2(-500f, -50f), new Vector2(800f, 90f),
             44, TextAnchor.UpperLeft, new Vector2(0.5f, 1f));
-        stepText = CreateText("StepText", new Vector2(330f, -70f), new Vector2(500f, 90f),
+        stepText = CreateText("StepText", new Vector2(500f, -50f), new Vector2(800f, 90f),
             44, TextAnchor.UpperRight, new Vector2(0.5f, 1f));
-        messageText = CreateText("MessageText", new Vector2(0f, -160f), new Vector2(1000f, 90f),
+        messageText = CreateText("MessageText", new Vector2(0f, -150f), new Vector2(1400f, 90f),
             40, TextAnchor.UpperCenter, new Vector2(0.5f, 1f));
 
         // Bottom-right: reset.

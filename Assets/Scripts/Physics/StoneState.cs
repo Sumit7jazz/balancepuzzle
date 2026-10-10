@@ -35,8 +35,8 @@ public sealed class StoneState : MonoBehaviour
         initialRotation = transform.rotation;
         initialIsKinematic = body.isKinematic;
         initialUseGravity = body.useGravity;
-        initialDrag = body.drag;
-        initialAngularDrag = body.angularDrag;
+        initialDrag = body.linearDamping;
+        initialAngularDrag = body.angularDamping;
         initialInterpolation = body.interpolation;
         initialCollisionDetection = body.collisionDetectionMode;
     }
@@ -56,6 +56,13 @@ public sealed class StoneState : MonoBehaviour
     /// <summary>Restores this stone's own initial state. Invoked via the reset event.</summary>
     public void ResetState()
     {
+        // Restore dynamic control first so the velocity writes below are
+        // always legal (writing velocity on a kinematic body warns).
+        // End state is unchanged: flags are restored to recorded values after.
+        body.isKinematic = false;
+        body.linearVelocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
+
         // Teleport via the Rigidbody API (not Transform) — the documented-correct
         // way to move a physics body without fighting the simulation.
         body.position = initialPosition;
@@ -63,12 +70,10 @@ public sealed class StoneState : MonoBehaviour
 
         body.isKinematic = initialIsKinematic;
         body.useGravity = initialUseGravity;
-        body.drag = initialDrag;
-        body.angularDrag = initialAngularDrag;
+        body.linearDamping = initialDrag;
+        body.angularDamping = initialAngularDrag;
         body.interpolation = initialInterpolation;
         body.collisionDetectionMode = initialCollisionDetection;
-        body.velocity = Vector3.zero;
-        body.angularVelocity = Vector3.zero;
 
         body.WakeUp();
     }

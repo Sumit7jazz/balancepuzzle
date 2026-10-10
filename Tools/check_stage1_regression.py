@@ -55,8 +55,11 @@ def main():
                     scales[mm.group(1)] = (sm.group(1), sm.group(2), sm.group(3))
                     break
     for s in ["Stone_A", "Stone_B", "Stone_C", "Stone_D"]:
+        got = scales.get(s)
+        unscaled = (got is not None
+                    and all(abs(float(v) - 1.0) < 1e-9 for v in got))
         ok &= check(f"BUG-003: {s} root unscaled",
-                    scales.get(s) == ("1.0", "1.0", "1.0"), f"got {scales.get(s)}")
+                    unscaled, f"got {scales.get(s)}")
 
     # BUG-004: Finalizer must not CALL AddObjectToAsset (mentions in comments are OK).
     f = src("Assets/Editor/Stage1AssetFinalizer.cs")

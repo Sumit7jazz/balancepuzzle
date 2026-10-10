@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="16" result="Passed" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:42:08Z" duration="20.8583241">
+  <test-suite type="TestSuite" id="1027" name="balancepuzzle" fullname="balancepuzzle" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:42:08Z" duration="20.858324" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1021" name="PlayModeTests.dll" fullname="E:/GAME/balancepuzzle/Library/ScriptAssemblies/PlayModeTests.dll" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:42:08Z" duration="20.833596" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="8256" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1022" name="BalancePuzzle" fullname="BalancePuzzle" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:42:08Z" duration="20.832337" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1023" name="Tests" fullname="BalancePuzzle.Tests" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:42:08Z" duration="20.831662" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="AutomatedBalanceBotTest" fullname="BalancePuzzle.Tests.AutomatedBalanceBotTest" classname="BalancePuzzle.Tests.AutomatedBalanceBotTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:41:51Z" duration="4.129435" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="BotStacksStoneA_LocksAndAppliesBonus" fullname="BalancePuzzle.Tests.AutomatedBalanceBotTest.BotStacksStoneA_LocksAndAppliesBonus" methodname="BotStacksStoneA_LocksAndAppliesBonus" classname="BalancePuzzle.Tests.AutomatedBalanceBotTest" runstate="Runnable" seed="588136810" result="Passed" start-time="2026-10-09 18:41:47Z" end-time="2026-10-09 18:41:51Z" duration="3.715646" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Order" value="1" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[StabilityEvaluator: evaluating 'Stone_A'.
+StabilityEvaluator: 'Stone_A' stable (locked after 2.02s calm).
+]]></output>
+            </test-case>
+            <test-case id="1003" name="ResetRestoresStoneSnapshots" fullname="BalancePuzzle.Tests.AutomatedBalanceBotTest.ResetRestoresStoneSnapshots" methodname="ResetRestoresStoneSnapshots" classname="BalancePuzzle.Tests.AutomatedBalanceBotTest" runstate="Runnable" seed="280698460" result="Passed" start-time="2026-10-09 18:41:51Z" end-time="2026-10-09 18:41:51Z" duration="0.178012" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Order" value="2" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1004" name="FellStoneFailsCleanlyWithoutNullReference" fullname="BalancePuzzle.Tests.AutomatedBalanceBotTest.FellStoneFailsCleanlyWithoutNullReference" methodname="FellStoneFailsCleanlyWithoutNullReference" classname="BalancePuzzle.Tests.AutomatedBalanceBotTest" runstate="Runnable" seed="223203999" result="Passed" start-time="2026-10-09 18:41:51Z" end-time="2026-10-09 18:41:51Z" duration="0.113997" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Order" value="3" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[StabilityEvaluator: evaluating 'Stone_B'.
+StabilityEvaluator: evaluation failed — Stone fell..
+]]></output>
+            </test-case>
+            <test-case id="1005" name="TimerExpiryFailsCleanly" fullname="BalancePuzzle.Tests.AutomatedBalanceBotTest.TimerExpiryFailsCleanly" methodname="TimerExpiryFailsCleanly" classname="BalancePuzzle.Tests.AutomatedBalanceBotTest" runstate="Runnable" seed="2125909273" result="Passed" start-time="2026-10-09 18:41:51Z" end-time="2026-10-09 18:41:51Z" duration="0.084090" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="Order" value="4" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1006" name="PersistentCameraControllerTest" fullname="BalancePuzzle.Tests.PersistentCameraControllerTest" classname="BalancePuzzle.Tests.PersistentCameraControllerTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-09 18:41:51Z" end-time="2026-10-09 18:42:00Z" duration="8.642865" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1010" name="IntegratesWithStage1SandboxScene" fullname="BalancePuzzle.Tests.PersistentCameraControllerTest.IntegratesWithStage1SandboxScene" methodname="IntegratesWithStage1SandboxScene" classname="BalancePuzzle.Tests.PersistentCameraControllerTest" runstate="Runnable" seed="1194465538" result="Passed" start-time="2026-10-09 18:41:51Z" end-time="2026-10-09 18:41:52Z" duration="1.128901" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="ReleasedSliderKeepsAngleWithoutRecentering" fullname="BalancePuzzle.Tests.PersistentCameraControllerTest.ReleasedSliderKeepsAngleWithoutRecentering" methodname="ReleasedSliderKeepsAngleWithoutRecentering" classname="BalancePuzzle.Tests.PersistentCameraControllerTest" runstate="Runnable" seed="457330987" result="Passed" start-time="2026-10-09 18:41:52Z" end-time="2026-10-09 18:41:55Z" duration="3.003025" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1009" name="ResetButtonReturnsPivotSmoothlyToZero" fullname="BalancePuzzle.Tests.PersistentCameraControllerTest.ResetButtonReturnsPivotSmoothlyToZero" methodname="ResetButtonReturnsPivotSmoothlyToZero" classname="BalancePuzzle.Tests.PersistentCameraControllerTest" runstate="Runnable" seed="813574516" result="Passed" start-time="2026-10-09 18:41:55Z" end-time="2026-10-09 18:41:58Z" duration="3.003763" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="SliderHalfDrivesYawTowardPositiveTarget" fullname="BalancePuzzle.Tests.PersistentCameraControllerTest.SliderHalfDrivesYawTowardPositiveTarget" methodname="SliderHalfDrivesYawTowardPositiveTarget" classname="BalancePuzzle.Tests.PersistentCameraControllerTest" runstate="Runnable" seed="832998878" result="Passed" start-time="2026-10-09 18:41:58Z" end-time="2026-10-09 18:42:00Z" duration="1.503628" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1011" name="ProximityAlignmentVisualizerTest" fullname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest" classname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-09 18:42:00Z" end-time="2026-10-09 18:42:05Z" duration="5.036952" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1014" name="AlignedHoldShowsGoldDots" fullname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest.AlignedHoldShowsGoldDots" methodname="AlignedHoldShowsGoldDots" classname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest" runstate="Runnable" seed="1184831301" result="Passed" start-time="2026-10-09 18:42:00Z" end-time="2026-10-09 18:42:01Z" duration="1.020112" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="HeldStoneFarAwayKeepsDefaultFovAndHidesDots" fullname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest.HeldStoneFarAwayKeepsDefaultFovAndHidesDots" methodname="HeldStoneFarAwayKeepsDefaultFovAndHidesDots" classname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest" runstate="Runnable" seed="333536260" result="Passed" start-time="2026-10-09 18:42:01Z" end-time="2026-10-09 18:42:02Z" duration="1.004554" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1013" name="NearStoneZoomsFovAndShowsMisalignedDots" fullname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest.NearStoneZoomsFovAndShowsMisalignedDots" methodname="NearStoneZoomsFovAndShowsMisalignedDots" classname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest" runstate="Runnable" seed="62746034" result="Passed" start-time="2026-10-09 18:42:02Z" end-time="2026-10-09 18:42:03Z" duration="1.006914" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1015" name="ReleaseHidesDotsAndRestoresDefaultFov" fullname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest.ReleaseHidesDotsAndRestoresDefaultFov" methodname="ReleaseHidesDotsAndRestoresDefaultFov" classname="BalancePuzzle.Tests.ProximityAlignmentVisualizerTest" runstate="Runnable" seed="259153384" result="Passed" start-time="2026-10-09 18:42:03Z" end-time="2026-10-09 18:42:05Z" duration="2.002926" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1016" name="StoneRotator3DTest" fullname="BalancePuzzle.Tests.StoneRotator3DTest" classname="BalancePuzzle.Tests.StoneRotator3DTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-09 18:42:05Z" end-time="2026-10-09 18:42:08Z" duration="3.019644" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1018" name="OffsetCameraTransformsRotationToItsView" fullname="BalancePuzzle.Tests.StoneRotator3DTest.OffsetCameraTransformsRotationToItsView" methodname="OffsetCameraTransformsRotationToItsView" classname="BalancePuzzle.Tests.StoneRotator3DTest" runstate="Runnable" seed="1860157096" result="Passed" start-time="2026-10-09 18:42:05Z" end-time="2026-10-09 18:42:05Z" duration="0.507586" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1020" name="ReleaseStopsRotationAccumulationCleanly" fullname="BalancePuzzle.Tests.StoneRotator3DTest.ReleaseStopsRotationAccumulationCleanly" methodname="ReleaseStopsRotationAccumulationCleanly" classname="BalancePuzzle.Tests.StoneRotator3DTest" runstate="Runnable" seed="356803250" result="Passed" start-time="2026-10-09 18:42:05Z" end-time="2026-10-09 18:42:06Z" duration="1.003408" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1019" name="RotationPreservesConfiguredCenterOfMass" fullname="BalancePuzzle.Tests.StoneRotator3DTest.RotationPreservesConfiguredCenterOfMass" methodname="RotationPreservesConfiguredCenterOfMass" classname="BalancePuzzle.Tests.StoneRotator3DTest" runstate="Runnable" seed="119149146" result="Passed" start-time="2026-10-09 18:42:06Z" end-time="2026-10-09 18:42:07Z" duration="0.503139" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1017" name="ScreenDeltaInducesCameraRelativeAngularChange" fullname="BalancePuzzle.Tests.StoneRotator3DTest.ScreenDeltaInducesCameraRelativeAngularChange" methodname="ScreenDeltaInducesCameraRelativeAngularChange" classname="BalancePuzzle.Tests.StoneRotator3DTest" runstate="Runnable" seed="1078835996" result="Passed" start-time="2026-10-09 18:42:07Z" end-time="2026-10-09 18:42:08Z" duration="1.003097" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/balis/AppData/LocalLow/DefaultCompany/balancepuzzle\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

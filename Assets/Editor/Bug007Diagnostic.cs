@@ -31,7 +31,7 @@ namespace BalancePuzzle.Editor
             // ---- A. Shader availability ----
             var litShader = Shader.Find("Universal Render Pipeline/Lit");
             Debug.Log("[DIAG-A] Shader.Find(\"Universal Render Pipeline/Lit\") => " +
-                (litShader == null ? "NULL" : $"found, name='{litShader.name}', instanceID={litShader.GetInstanceID()}"));
+                (litShader == null ? "NULL" : $"found, name='{litShader.name}'"));
             if (litShader != null)
             {
                 // Instance validity: a destroyed/null shader reports differently.
